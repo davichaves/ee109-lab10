@@ -34,7 +34,7 @@ main:
 	# newline = '\n' = 0x0a
 
 	addi	$t1, $zero, 0x0a	# Set $t1 = '\n' = 0x0a
-	addi	$t2, $zero, $zero	# Set $t2 = 0 
+	add	$t2, $zero, $zero	# Set $t2 = 0 
 	la	$a0, buf1
 	la	$a1, counts
 	la	$a3, buf1
@@ -49,23 +49,50 @@ L1:	lb	$t0, 0($a0)	# load buf1[i]
 	addi	$a0, $a0, 1	# increment pointer to next byte
 	b	L1
 	
-	sb	$zero, 0($a0)	# replace newline with null char
-	
 # checking if it's a palindrome
-L2:	lb	$t4, 0($a0)
-	lb	$t5, $t2($a3)
+L2:	addi	$a0, $a0, -1
+L5:	lb	$t5, 0($a0)
+	lb	$t4, 0($a3)
 	bne 	$t4, $t5, L3 	# branch if not a palindrome
-	addi	$a0, $a0, 1
-	addi	$a3, $a3, -1
-	blt 	$a3, $a0, L4
-	b 	L2
+	addi	$a0, $a0, -1
+	addi	$a3, $a3, 1
+	blt 	$a0, $a3, L4
+	b 	L5
 	
 #not a palindrome
-L3:     
-
+L3:     li	$v0, 4		# print the STRING
+	la	$a0, buf1
+	syscall
+	li	$v0, 4		# print out message
+	la	$a0, msg3
+	syscall
+	
+	b 	L8
+	
 #is a palindrome
-L4:	
+L4:	li	$v0, 4		# print the STRING
+	la	$a0, buf1
+	syscall
+	li	$v0, 4		# print out message
+	la	$a0, msg2
+	syscall
 
-	# exit
-	li	$v0,10
+L8:	# exit
+	add	$t2, $zero, $zero # t2 is the counter
+	add	$t3, $zero, $zero # t3 is the mode
+	add	$s1, $zero, $zero
+L6:	lb	$t4, 0($a1)
+	blt 	$t4, $t3, L7
+	add	$t3, $t4, $zero
+	add	$s1, $t2, $zero		
+L7:	addi	$t2, $t2, 1
+	addi	$a1, $a1, 1
+	blt 	$t2, 10, L6
+	li	$v0, 4		# print out message
+	la	$a0, msg4
+	syscall
+	li	$v0, 1		# print out message
+	add	$a0, $s1, $zero
+	syscall
+	li	$v0, 10
 	syscall
